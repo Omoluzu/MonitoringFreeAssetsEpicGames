@@ -46,14 +46,15 @@ CSV_FILE_NAME = config.get('CSV', 'file')
 
 
 async def tg_send_message(tg_bot: Bot, send_data: List[str]):
-    """Отправка сообщений в канал телеграма
+    """Отправка сообщений в канал телеграмма
 
     Args:
-        tg_bot: Авторизированый бот телеграма
+        tg_bot: Авторизированный бот телеграмма
         send_data: Список сообщений для отправки
     """
     for message in send_data:
-        await tg_bot.send_message(chat_id=TG_CHANT_ID, text=message)
+        await tg_bot.send_message(
+            chat_id=TG_CHANT_ID, text=message, parse_mode='markdown')
         await asyncio.sleep(1)
 
 
@@ -76,6 +77,15 @@ class Assets:
         if not self.__first_div:
             self.__first_div = self.assets_info.find_all('div')
         return self.__first_div
+
+    @property
+    def url(self) -> str:
+        """Получение ссылки на ресурс
+
+        Returns:
+             Ссылка на ресурс
+        """
+        return self.first_div[0].find('a')['href']
 
     @property
     def name(self) -> str:
@@ -113,7 +123,7 @@ def main():
     for element in soup.find_all('div', class_='fabkit-Stack-root nTa5u2sc'):
         assets = Assets(element)
         if not assets.name in chain_assets:
-            send_data.append(assets.name)
+            send_data.append(f"[{assets.name}]({URL}{assets.url[1:]})")
             save_assets.append([assets.name])
 
     if send_data:
