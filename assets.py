@@ -1,5 +1,5 @@
 __author__ = ['Volkov Aleksey']
-__version__ = '1.0.0'
+__version__ = '1.1.0'
 
 import os
 import sys
@@ -12,7 +12,7 @@ from itertools import chain
 import bs4.element
 from telegram import Bot
 from bs4 import BeautifulSoup
-from cloudscraper import create_scraper
+from unblock_requests import CloudflareSession
 
 PATH_TO_INI_FILE = 'config.ini'
 
@@ -107,9 +107,10 @@ class Assets:
 
 
 def main():
-    scraper = create_scraper(browser=BROWSER, interpreter=INTERPRETER)
-    response = scraper.get(url=URL_FREE_ASSETS, headers=HEADERS)
-    soup = BeautifulSoup(response.text, 'html.parser')
+
+    session = CloudflareSession(flaresolverr_url="http://localhost:8191")
+    html = session.get(URL_FREE_ASSETS).text
+    soup = BeautifulSoup(html, 'html.parser')
 
     try:
         with open(CSV_FILE_NAME, 'r', newline='', encoding='utf-8') as csv_file:
@@ -120,7 +121,8 @@ def main():
         save_assets = chain_assets = []
 
     send_data = []
-    for element in soup.find_all('div', class_='fabkit-Stack-root nTa5u2sc'):
+
+    for element in soup.find_all('div', class_="fabkit-Stack-root nTa5u2sc"):
         assets = Assets(element)
         if not assets.name in chain_assets:
             send_data.append(f"[{assets.name}]({URL}{assets.url[1:]})")
@@ -136,6 +138,8 @@ def main():
 
     else:
         print('Изменений нет')
+
+
 
 
 if __name__ == '__main__':

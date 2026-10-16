@@ -39,7 +39,13 @@ file = assets.csv  # путь до файла где будут хранятьс
 
 - Установка зависимостей
 ```bash
-python -m pip install requirements.txt 
+python -m pip install -r requirements.txt 
+```
+
+- Запуск сервиса FlareSolver (docker service)
+FlareSolver - это прокси-сервер для обхода защиты Cloudflare. При запросе он поднимает браузер, мы в ней открываем страницу ассетов и уже с прогружженым javascript парсится страница.
+```bash
+docker run -d --name=flaresolverr -p 8191:8191 --restart unless-stopped ghcr.io/flaresolverr/flaresolverr:latest
 ```
 
 - Запуск скрипта
